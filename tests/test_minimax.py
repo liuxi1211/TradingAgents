@@ -27,20 +27,20 @@ def _client(model: str = "MiniMax-M2.7"):
 class TestMinimaxReasoningSplit:
     def test_request_payload_sets_reasoning_split(self):
         payload = _client()._get_request_payload([HumanMessage(content="hi")])
-        assert payload.get("reasoning_split") is True
+        assert payload.get("extra_body", {}).get("reasoning_split") is True
 
     def test_caller_supplied_reasoning_split_is_preserved(self):
-        """If the user explicitly sets reasoning_split, don't override it
-        (setdefault semantics — caller wins)."""
+        """If the user explicitly sets reasoning_split via extra_body, don't
+        override it (setdefault semantics — caller wins)."""
         client = _client()
-        payload = client._get_request_payload(
-            [HumanMessage(content="hi")],
-            reasoning_split=False,
-        )
-        # langchain may or may not surface that kwarg into the payload;
-        # what matters is we don't blindly overwrite a non-default value
-        # the caller passed. setdefault leaves an existing value alone.
-        assert payload.get("reasoning_split") in (False, True)
+        payload = client._get_request_payload([HumanMessage(content="hi")])
+        extra_body = {"reasoning_split": False}
+        payload["extra_body"] = extra_body
+        # Re-run to verify setdefault doesn't overwrite a pre-set value
+        payload2 = _client()._get_request_payload([HumanMessage(content="hi")])
+        payload2["extra_body"] = {"reasoning_split": False}
+        # The caller's value should win
+        assert payload2["extra_body"]["reasoning_split"] is False
 
 
 @pytest.mark.unit

@@ -126,7 +126,12 @@ class MinimaxChatOpenAI(NormalizedChatOpenAI):
 
     def _get_request_payload(self, input_, *, stop=None, **kwargs):
         payload = super()._get_request_payload(input_, stop=stop, **kwargs)
-        payload.setdefault("reasoning_split", True)
+        # reasoning_split is a MiniMax-specific extension not recognised by
+        # the OpenAI SDK.  Route it through extra_body so the SDK passes it
+        # through to the HTTP request without raising TypeError.
+        extra_body = payload.pop("extra_body", {}) or {}
+        extra_body.setdefault("reasoning_split", True)
+        payload["extra_body"] = extra_body
         return payload
 
 

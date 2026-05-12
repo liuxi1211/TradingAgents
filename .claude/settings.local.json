@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m pytest tests/test_minimax.py -v -m unit)",
+      "Bash(conda run *)",
+      "Bash(D:/javaApp/miniforge/envs/tradingAgents/python.exe -m pytest tests/test_minimax.py -v -m unit)",
+      "Bash(D:/javaApp/miniforge/envs/tradingAgents/python.exe *)"
+    ]
+  }
+}
